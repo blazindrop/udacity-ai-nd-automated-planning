@@ -228,23 +228,25 @@ class PlanningGraph:
         -----
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
-        self.fill()
         level = 0
-
-        for literal_layer in self.literal_layers:
+        while not self._is_leveled:
+            last_lit_layer = self.literal_layers[level]
             all_goals_met = True
             for goal in self.goal:
-                if goal not in literal_layer:
+                if goal not in last_lit_layer:
                     all_goals_met = False
+                    break
             if all_goals_met:
                 goals_are_mutex = False
                 for goal_a, goal_b in combinations(self.goal, 2):
-                    if literal_layer.is_mutex(goal_a, goal_b):
+                    if last_lit_layer.is_mutex(goal_a, goal_b):
                         goals_are_mutex = True
                         break
                 if not goals_are_mutex:
-                    return level    
+                    return level
+            self._extend()
             level += 1
+        return level
 
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
